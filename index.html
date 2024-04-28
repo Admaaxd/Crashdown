@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crashdown Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <audio id="bg-music" src="music/bgmusic.mp3" loop></audio>
+        <audio id="pop-sound" src="music/pop.mp3"></audio>
+        <div id="score-panel">Score: <span id="score">0</span> | Timer: <span id="timer">00:00</span></div>
+        <div id="game-container">
+            <div id="grid"></div>
+        </div>
+        <div id="counter-panel">Until new blocks: <span id="counter">5</span></div>
+        <button id="reset-button" class="reset-button">Reset Game</button>
+        <button id="audio-control" class="audio-button">▶️</button>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
