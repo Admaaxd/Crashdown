@@ -1,8 +1,10 @@
 $(document).ready(function() {
+    // Game settings and state variables
     const rows = 10, cols = 10, colors = ["red", "blue", "green", "yellow"];
     let score = 0, removalCount = 0, gameTime = 0, gameTimer, isGameOver = false, blockRemoveCounter = 0;
     const bgMusic = document.getElementById('bg-music');
     
+    // Initialize the game grid with random colors and special blocks
     function createGrid() {
         $('#grid').empty();
         for (let i = 0; i < rows * cols; i++) {
@@ -20,53 +22,7 @@ $(document).ready(function() {
         updateCounterDisplay();
     }
 
-    $('#audio-control').click(function() {
-        bgMusic.volume = 0.2;
-        if (bgMusic.paused) {
-            bgMusic.play();
-            $(this).text('⏸');
-        } else {
-            bgMusic.pause();
-            $(this).text('▶️');
-        }
-    });
-
-    function updateScore(points) {
-        score += points;
-        $('#score').text(score);
-    }
-
-    function resetGame() {
-        clearInterval(gameTimer);
-        gameTime = 0;
-        score = 0; 
-        isGameOver = false;
-        updateTimerDisplay();
-        blockRemoveCounter = 0;
-        removalCount = 0;
-        updateScore(0);
-        createGrid();
-        $('#reset-button').removeClass('blink');
-        startTimer();
-    }
-
-    function startTimer() {
-        gameTimer = setInterval(function() {
-            gameTime++;
-            updateTimerDisplay();
-        }, 1000);
-    }
-
-    function updateTimerDisplay() {
-        let minutes = Math.floor(gameTime / 60);
-        let seconds = gameTime % 60;
-        $('#timer').text(`${padTime(minutes)}:${padTime(seconds)}`);
-    }
-
-    function padTime(num) {
-        return num.toString().padStart(2, '0');
-    }
-
+    // Collapses columns, moving blocks downward to fill empty spaces
     function collapseColumns() {
         for (let col = 0; col < cols; col++) {
             let column = [];
@@ -76,19 +32,17 @@ $(document).ready(function() {
                     column.push(cell);
                 }
             }
-            for (let row = rows - 1; row >= 0; row--) {
+            for (let row = 0; row < rows; row++) {
                 let cellIndex = col + row * cols;
-                if (row >= column.length) {
-                    $('#grid div').eq(cellIndex).animate({ opacity: 0 }, 300, function() {
-                        $(this).remove();
-                    });
-                } else {
-                    let cellToMove = column[row];
-                    let newCellIndex = col + (rows - column.length + row) * cols;
-                    let oldCell = $('#grid div').eq(newCellIndex);
+                if (row < column.length) {
+                    let cellToMove = column[column.length - 1 - row];
+                    let oldCell = $('#grid div').eq(cellIndex);
                     if (!oldCell.is(cellToMove)) {
-                        oldCell.before(cellToMove.css('top', `${(column.length - row - 1) * -40}px`).animate({ top: '0px' }, 80));
+                        oldCell.before(cellToMove);
+                        cellToMove.css('top', '40px').animate({top: '0px'}, 80);
                     }
+                } else {
+                    $('#grid div').eq(cellIndex).remove();
                 }
             }
         }
@@ -96,6 +50,7 @@ $(document).ready(function() {
         checkGameOver();
     }
 
+    // Adds new blocks if there are empty spaces after removing blocks
     function fillEmptySpaces() {
         let emptySpaces = rows * cols - $('#grid div').length;
         if (emptySpaces > 0 && removalCount % 5 === 0) {
@@ -115,6 +70,60 @@ $(document).ready(function() {
         }
     }
 
+    // Toggles background music on and off
+    $('#audio-control').click(function() {
+        bgMusic.volume = 0.2;
+        if (bgMusic.paused) {
+            bgMusic.play();
+            $(this).text('⏸');
+        } else {
+            bgMusic.pause();
+            $(this).text('▶️');
+        }
+    });
+
+    // Updates the score display
+    function updateScore(points) {
+        score += points;
+        $('#score').text(score);
+    }
+
+    // Resets the game to its initial state
+    function resetGame() {
+        clearInterval(gameTimer);
+        gameTime = 0;
+        score = 0; 
+        isGameOver = false;
+        updateTimerDisplay();
+        blockRemoveCounter = 0;
+        removalCount = 0;
+        updateScore(0);
+        createGrid();
+        $('#reset-button').removeClass('blink');
+        startTimer();
+    }
+
+    // Starts the game timer
+    function startTimer() {
+        gameTimer = setInterval(function() {
+            gameTime++;
+            updateTimerDisplay();
+        }, 1000);
+    }
+
+    // Updates the timer display
+    function updateTimerDisplay() {
+        let minutes = Math.floor(gameTime / 60);
+        let seconds = gameTime % 60;
+        $('#timer').text(`${padTime(minutes)}:${padTime(seconds)}`);
+    }
+
+    // Pads time values to ensure two digits
+    function padTime(num) {
+        return num.toString().padStart(2, '0');
+    }
+
+    // Triggered when a bomb block is activated, removes nearby blocks
     function explodeBomb($bombBlock) {
         let index = $('#grid div').index($bombBlock);
         let col = index % cols;
@@ -134,6 +143,7 @@ $(document).ready(function() {
         removeBlocks($(blocksToRemove));
     }
 
+    // Triggered when a rainbow block is activated, removes all blocks in its row and column
     function clearCross($rainbowBlock) {
         let index = $('#grid div').index($rainbowBlock);
         let col = index % cols;
@@ -155,19 +165,6 @@ $(document).ready(function() {
         }
     }
 
-    function removeBlocks($blocks) {
-        $blocks.each(function() {
-            $(this).remove();
-        });
-        updateScore($blocks.length);
-        removalCount++;
-        blockRemoveCounter++;
-        playPopSound();
-        collapseColumns();
-        checkGameOver();
-        checkForFifthRemoval();
-    }
-
     function checkForFifthRemoval() {
         if (blockRemoveCounter >= 5) {
             blockRemoveCounter = 0;
@@ -175,10 +172,12 @@ $(document).ready(function() {
         updateCounterDisplay();
     }
 
+    // Updates the display for the block removal counter
     function updateCounterDisplay() {
         $('#counter').text(5 - blockRemoveCounter);
     }
 
+    // Finds blocks adjacent to a given block
     function findAdjacent($block, color, list) {
         let index = $('#grid div').index($block);
         let neighbors = [
@@ -196,9 +195,10 @@ $(document).ready(function() {
         return list;
     }
 
+    // Checks if the game is over
     function checkGameOver() {
         if ($('#grid div').length === 0 && !isGameOver) {
-            isGameOver = true; // Set the flag to true to prevent further alerts
+            isGameOver = true;
             clearInterval(gameTimer);
             $('#reset-button').addClass('blink');
             alert(`Congratulations! You won! Time: ${$('#timer').text()}, Score: ${score}`);
@@ -216,6 +216,8 @@ $(document).ready(function() {
         }
         return false;
     }
+
+    // Shuffles the grid when no moves are available
     function shuffleGrid() {
         let elements = $('#grid div').get();
         do {
@@ -224,18 +226,20 @@ $(document).ready(function() {
         } while (!checkPossibleMoves());
     }
 
+    // Checks for possible moves within the grid
     function checkPossibleMoves() {
         for (let i = 0; i < $('#grid div').length; i++) {
             let $block = $('#grid div').eq(i);
             let color = $block.attr('class');
             let blocks = findAdjacent($block, color, [$block[0]]);
             if (blocks.length > 1) {
-                return true; // Valid move found
+                return true;
             }
         }
-        return false; // No valid moves found
+        return false;
     }
 
+    // Adds random blocks to the grid
     function addRandomBlocks(count) {
         for (let i = 0; i < count; i++) {
             let newColor = colors[Math.floor(Math.random() * colors.length)];
@@ -243,12 +247,28 @@ $(document).ready(function() {
         }
     }
 
+    // Plays a popping sound effect when blocks are removed
     function playPopSound() {
         var popSound = document.getElementById('pop-sound');
         popSound.volume = 0.2;
         popSound.play();
     }
 
+    // Removes blocks and updates the game state
+    function removeBlocks($blocks) {
+        $blocks.each(function() {
+            $(this).remove();
+        });
+        updateScore($blocks.length);
+        removalCount++;
+        blockRemoveCounter++;
+        playPopSound();
+        collapseColumns();
+        checkGameOver();
+        checkForFifthRemoval();
+    }
+
+    // Event handler for clicking on blocks
     $('#grid').on('click', 'div', function() {
         let color = $(this).attr('class');
         if (color === 'rainbow') {
@@ -263,6 +283,7 @@ $(document).ready(function() {
         }
     });
 
+    // Event handler for the reset button
     $('#reset-button').click(function() {
         resetGame();
     });

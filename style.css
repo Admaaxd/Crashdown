@@ -25,6 +25,7 @@
     grid-template-columns: repeat(10, 1fr);
     gap: 1px;
     margin-top: 10px;
+    transform: rotate(3.142rad);
 }
 
 #grid div {
@@ -125,18 +126,18 @@
 }
 
 .rainbow {
-    background-image: linear-gradient(to left, violet, indigo, blue, green, yellow, orange, red);
-    background-size: 400% 400%;
-    animation: rainbow-shift 8s ease infinite;
+    animation: rainbow-colors 10s ease-in-out infinite;
 }
 
-@keyframes rainbow-shift {
-    0%, 100% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
+@keyframes rainbow-colors {
+    0% { background-color: violet; }
+    14% { background-color: indigo; }
+    28% { background-color: blue; }
+    42% { background-color: green; }
+    56% { background-color: yellow; }
+    70% { background-color: orange; }
+    84% { background-color: red; }
+    100% { background-color: violet; }
 }
 
 #counter-panel {
