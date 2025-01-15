@@ -17,3 +17,4 @@ A fun, interactive browser-based game developed in JavaScript. Inspired by class
 - **HTML/CSS/JavaScript**: Core web development technologies.
 - **jQuery**: Simplifies DOM manipulation and animations.
 - **CSS Animations**: Adds visual effects to special blocks.
+- **Jest**: A JavaScript testing framework used to validate game logic and functionality.
