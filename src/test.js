@@ -11,8 +11,6 @@ const {
     collapseColumns,
     fillEmptySpaces,
     updateScore,
-    resetGame,
-    startTimer,
     padTime,
     explodeBomb,
     clearCross,
@@ -21,7 +19,6 @@ const {
     addRandomBlocks,
     rows,
     cols,
-    colors
 } = require('./script');
 
 // Mock the DOM
